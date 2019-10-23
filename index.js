@@ -1,4 +1,4 @@
-let gridRows = 15;
+let gridRows = 10;
 let gridColumns = 10;
 let currentPosition
 let currentTetrominoDirection
@@ -38,8 +38,20 @@ function updateTiles(position, dataId, dataAction){
 
 function createNewTetronimo(){
     currentTetromino = new TShape()
-    updateTiles(currentTetromino.currentPosition, 'shape', 'active')
     
+    let coordinates = currentTetromino.currentPosition
+    let isOpen = true
+    coordinates.forEach(function(coord){
+        let block = document.querySelector(`div[data-x="${coord.x}"][data-y="${coord.y}`)
+        if (block.dataset.action === 'deactive') {
+            isOpen = false
+        }
+    })
+    if (isOpen){
+        updateTiles(currentTetromino.currentPosition, 'shape', 'active')
+    } else {
+        clearInterval(shapeDescend)
+    }
 }
 
 function getActiveTetrominoPosition(){
@@ -68,12 +80,8 @@ function getMovePosition(currentBlock, direction){
 
 function checkMovePosition(moveDirection){ 
     const nextMove = document.querySelector(`div[data-x="${moveDirection[0]}"][data-y="${moveDirection[1]}`)
-    // check if true
-    if (nextMove) {
-        
-        
+    if (nextMove) {    
         if (!(nextMove.dataset.action === 'deactive')) {
-            
             return true
         } else {
             return false
@@ -137,10 +145,18 @@ function run(){
         } else {
             let current = getActiveTetrominoCoordinates()
             updateTiles(current, 'shape', 'deactive')
+            addPoint()
             createNewTetronimo()
         }
       }, intervalSpeed)
 }
+
+function start(){
+    createNewTetronimo()
+    run()
+}
+
+
 
 document.addEventListener('keydown', function(event){
     if (event.key === "ArrowUp"){
@@ -154,8 +170,16 @@ document.addEventListener('keydown', function(event){
     }
 })
 
+document.addEventListener('click', function(event){
+    if (event.target.id === 'start'){
+        start()
+    }
+})
 
+function addPoint(){
+    const score = document.querySelector('#score').querySelector('span')
+    let newScore = parseInt(score.innerText) + 1
+    score.innerText = newScore
+}
 
 createGrid()
-createNewTetronimo()
-// run()
