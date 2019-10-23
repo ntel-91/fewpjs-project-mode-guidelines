@@ -18,7 +18,7 @@ function createGrid(){
     for (let i=0; i < gridRows; i++){ // check if this is the rows?
       for (let j=0; j < gridColumns; j++){ // check if this the columns?
         board.insertAdjacentHTML("beforeend", `
-          <div class="tile" data-x=${j} data-y=${i}></div>
+          <div class="tile" data-x=${j} data-y=${i} data-id="" data-action=""></div>
         `)
       }
     }
@@ -39,7 +39,7 @@ function updateTiles(position, dataId, dataAction){
 function createNewTetronimo(){
     currentTetromino = new TShape()
     updateTiles(currentTetromino.currentPosition, 'shape', 'active')
-    // run()
+    
 }
 
 function getActiveTetrominoPosition(){
@@ -62,15 +62,22 @@ function getActiveTetrominoCoordinates(){
 }
 
 function getMovePosition(currentBlock, direction){
-    const movePosition = [parseInt(currentBlock.dataset.x) + direction.x, parseInt(currentBlock.dataset.y) + direction.y]
-    return movePosition
+    const moveDirection = [parseInt(currentBlock.dataset.x) + direction.x, parseInt(currentBlock.dataset.y) + direction.y]
+    return moveDirection
 }
 
 function checkMovePosition(moveDirection){ 
     const nextMove = document.querySelector(`div[data-x="${moveDirection[0]}"][data-y="${moveDirection[1]}`)
     // check if true
-    if (nextMove) {  // || move.dataset.action === "active")
-        return true
+    if (nextMove) {
+        
+        
+        if (!(nextMove.dataset.action === 'deactive')) {
+            
+            return true
+        } else {
+            return false
+        }
     } else {
         return false
     }
@@ -146,6 +153,8 @@ document.addEventListener('keydown', function(event){
         move(down)
     }
 })
+
+
 
 createGrid()
 createNewTetronimo()
