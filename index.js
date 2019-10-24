@@ -4,6 +4,8 @@ let currentPosition
 let currentTetrominoDirection
 let rotateDown
 let currentTetromino
+let currentTetrominoColor
+let player
 let intervalSpeed = 500
 
 /// test direction
@@ -13,10 +15,113 @@ let down = [{x: 0, y: 1}, {x: 0, y: 1}, {x: 0, y: 1}, {x: 0, y: 1}]
 NodeList.prototype.forEach = Array.prototype.forEach
 NodeList.prototype.map = Array.prototype.map
 
+const user = document.querySelector('#user')
+user.insertAdjacentHTML('beforeend',`
+    <form id="login">
+        <label for="name">Username: </label>
+        <input type="text" name="name">
+        <input type="submit" value="login">
+    </form>
+`)
+
+const form = document.querySelector('#login')
+form.addEventListener('submit',function(event){
+    event.preventDefault()
+    if (event.type === 'submit') {
+        fetch(`http://localhost:3000/api/v1/users`)
+        .then(res => res.json())
+        .then(function(data){
+            
+            player = data.find(function(user){
+                return user.username === event.target.name.value
+            })
+            
+            let previousGames
+            if (player.games.length >= 3){
+                previousGames = player.games.slice(-3).reverse()
+            } else {
+                previousGames = player.games.reverse()
+            }
+
+            const scores = player.games.map(function(game){
+                return game.score
+            })
+            renderUsername(player.username)
+            renderHighScore(Math.max.apply(null, scores))
+            renderPreviousGames(previousGames)
+        })
+    }
+})
+
+function renderUsername(user){
+    const userLogin = document.querySelector('#user')
+    userLogin.innerHTML = ""
+    userLogin.insertAdjacentHTML('beforeend',`Welcome, ${user}`)
+}
+
+function renderHighScore(score){
+    const highscore = document.querySelector('#highscore')
+    highscore.innerHTML = ""
+    highscore.insertAdjacentHTML('beforeend',`
+        Your HighScore: <span>${score}</span>
+    `)
+}
+
+function renderPreviousGames(games){
+    let str = ''
+    games.forEach((game) => str = str + `<li>${game.score} points on: ${game.created_at.slice(0,10)}</li>`)
+    
+    const previousGames = document.querySelector('#previous-games')
+    previousGames.insertAdjacentHTML('afterbegin',`
+        <p>Previous Stack 'Em Scores</p>
+        <ul id='previous-games-list'>
+            ${str}
+        </ul>
+    `)
+}
+
+function createNewScore(score){
+    const body = {
+        score: score,
+        user_id: player.id
+    }
+
+    fetch('http://localhost:3000/api/v1/games',{
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accepts": "application/json"
+        },
+        body: JSON.stringify(body)
+    })
+    .then(res => res.json())
+    .then(function(data){
+        console.log('hi')
+        if (getCurrentHighScore() < data.score){
+            renderHighScore(data.score)
+        }
+        updatePreviousGames(data.score, data.created_at.slice(0,10))
+        
+    })
+}
+
+function getCurrentHighScore(){
+    const highscore = document.querySelector('#highscore').querySelector('span')
+    return parseInt(highscore.innerText)   
+}
+
+function updatePreviousGames(score, played){
+    const gamesList = document.querySelector('#previous-games-list')
+    gamesList.lastElementChild.remove()
+    gamesList.insertAdjacentHTML('afterbegin',`
+        <li>${score} points on: ${played}</li>
+    `)
+}
+
 function createGrid(){
     const board = document.querySelector("#board")  
-    for (let i=0; i < gridRows; i++){ // check if this is the rows?
-      for (let j=0; j < gridColumns; j++){ // check if this the columns?
+    for (let i=0; i < gridRows; i++){
+      for (let j=0; j < gridColumns; j++){
         board.insertAdjacentHTML("beforeend", `
           <div class="tile" data-x=${j} data-y=${i} data-id="" data-action=""></div>
         `)
@@ -51,6 +156,8 @@ function createNewTetronimo(){
         updateTiles(currentTetromino.currentPosition, 'shape', 'active')
     } else {
         clearInterval(shapeDescend)
+        const score = document.querySelector('#score').querySelector('span')
+        createNewScore(parseInt(score.innerText))
     }
 }
 
@@ -78,7 +185,7 @@ function getMovePosition(currentBlock, direction){
     return moveDirection
 }
 
-function checkMovePosition(moveDirection){ 
+function checkMovePosition(moveDirection){
     const nextMove = document.querySelector(`div[data-x="${moveDirection[0]}"][data-y="${moveDirection[1]}`)
     if (nextMove) {    
         if (!(nextMove.dataset.action === 'deactive')) {
@@ -156,7 +263,11 @@ function start(){
     run()
 }
 
-
+function addPoint(){
+    const score = document.querySelector('#score').querySelector('span')
+    let newScore = parseInt(score.innerText) + 1
+    score.innerText = newScore
+}
 
 document.addEventListener('keydown', function(event){
     if (event.key === "ArrowUp"){
@@ -175,11 +286,5 @@ document.addEventListener('click', function(event){
         start()
     }
 })
-
-function addPoint(){
-    const score = document.querySelector('#score').querySelector('span')
-    let newScore = parseInt(score.innerText) + 1
-    score.innerText = newScore
-}
 
 createGrid()
