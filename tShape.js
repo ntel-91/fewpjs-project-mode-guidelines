@@ -5,12 +5,12 @@ class TShape {
 //        4               4                              4
     constructor(){
         this.currentTetrominoDirection = 'down'
-        this.currentPosition = [{x: 4, y: 0}, {x: 5, y:0}, {x: 6, y: 0}, {x: 5, y: 1}],
+        this.currentPosition = [{x: 4, y: 1}, {x: 5, y:1}, {x: 6, y: 1}, {x: 5, y: 2}],
         this.rotateFromDownPosition = [{x: 1, y: -1}, {x: 0, y:0}, {x: -1, y: 1}, {x: -1, y: -1}]
         this.rotateFromLeftPosition = [{x: 1, y: 1}, {x: 1, y: -1}, {x: 0, y: 0}, {x: -1, y: -1}],
         this.rotateFromUpPosition = [{x: 1, y: 1}, {x: 1, y: -1}, {x: 0, y: 0}, {x: -1, y: 1}],
         this.rotateFromRightPosition = [{x: 1, y: 1}, {x: 0, y: 0}, {x: -1, y: 1}, {x: -1, y: -1}]
-        this.color = 'purple'
+        this.color = 'background-color:purple'
     }
 }
 
@@ -21,8 +21,3 @@ class TShape {
 // var s = { blocks: [0x06C0, 0x8C40, 0x6C00, 0x4620], color: 'green'  };
 // var t = { blocks: [0x0E40, 0x4C40, 0x4E00, 0x4640], color: 'purple' };
 // var z = { blocks: [0x0C60, 0x4C80, 0xC600, 0x2640], color: 'red'    };
-
-//       0 0 1 0         0 0 0 0         0 1 0 0            0 0 0 0
-// down: 0 0 2 0   left: 0 0 0 0     up: 0 2 0 0     right: 0 0 0 0
-//       0 0 3 0         1 2 3 4         0 3 0 0            1 2 3 4
-//       0 0 4 0         0 0 0 0         0 4 0 0            0 0 0 0

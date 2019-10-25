@@ -1,4 +1,4 @@
-let gridRows = 10;
+let gridRows = 15;
 let gridColumns = 10;
 let currentPosition
 let currentTetrominoDirection
@@ -8,7 +8,21 @@ let currentTetrominoColor
 let player
 let intervalSpeed = 500
 
-/// test direction
+function generateRandom(){
+    return Math.floor((Math.random() * 7) + 1); 
+}
+
+const tetromino = {
+    1: (() => new TShape()),
+    2: (() => new IShape()),
+    3: (() => new LShape()),
+    4: (() => new OShape()),
+    5: (() => new SShape()),
+    6: (() => new JShape()),
+    7: (() => new ZShape())
+}
+
+
 let left = [{x: -1, y: 0}, {x: -1, y: 0}, {x: -1, y: 0}, {x: -1, y: 0}]
 let right = [{x: 1, y: 0}, {x: 1, y: 0}, {x: 1, y: 0}, {x: 1, y: 0}]
 let down = [{x: 0, y: 1}, {x: 0, y: 1}, {x: 0, y: 1}, {x: 0, y: 1}]
@@ -123,27 +137,15 @@ function createGrid(){
     for (let i=0; i < gridRows; i++){
       for (let j=0; j < gridColumns; j++){
         board.insertAdjacentHTML("beforeend", `
-          <div class="tile" data-x=${j} data-y=${i} data-id="" data-action=""></div>
+          <div class="tile" data-x=${j} data-y=${i} data-id="" data-action="" style=""></div>
         `)
       }
     }
 }
 
-function updateIndividualTile(position, dataId, dataAction){ 
-    const tile = document.querySelector(`div[data-x="${position.x}"][data-y="${position.y}`)
-    tile.id = dataId
-    tile.dataset.action = dataAction
-}
-
-function updateTiles(position, dataId, dataAction){
-    position.forEach(function(tile){
-        updateIndividualTile(tile, dataId, dataAction)
-    })
-}
-
 function createNewTetronimo(){
-    currentTetromino = new TShape()
-    
+    currentTetromino = tetromino[generateRandom()]()
+    currentTetrominoColor = currentTetromino.color
     let coordinates = currentTetromino.currentPosition
     let isOpen = true
     coordinates.forEach(function(coord){
@@ -153,12 +155,25 @@ function createNewTetronimo(){
         }
     })
     if (isOpen){
-        updateTiles(currentTetromino.currentPosition, 'shape', 'active')
+        updateTiles(currentTetromino.currentPosition, 'shape', 'active', currentTetrominoColor)
     } else {
         clearInterval(shapeDescend)
         const score = document.querySelector('#score').querySelector('span')
         createNewScore(parseInt(score.innerText))
     }
+}
+
+function updateIndividualTile(position, dataId, dataAction, color){ 
+    const tile = document.querySelector(`div[data-x="${position.x}"][data-y="${position.y}`)
+    tile.id = dataId
+    tile.dataset.action = dataAction
+    tile.style = color
+}
+
+function updateTiles(position, dataId, dataAction, color){
+    position.forEach(function(tile){
+        updateIndividualTile(tile, dataId, dataAction, color)
+    })
 }
 
 function getActiveTetrominoPosition(){
@@ -219,8 +234,8 @@ function move(direction){
             existing.push({x: parseInt(current[i].dataset.x), y: parseInt(current[i].dataset.y)})
             next.push({x: parseInt(current[i].dataset.x) + direction[i].x, y: parseInt(current[i].dataset.y) + direction[i].y})
         }
-        updateTiles(existing, '', '')
-        updateTiles(next, 'shape', 'active')    
+        updateTiles(existing, '', '', '')
+        updateTiles(next, 'shape', 'active', currentTetrominoColor)    
     }
 }
 
@@ -251,7 +266,7 @@ function run(){
             move(down)
         } else {
             let current = getActiveTetrominoCoordinates()
-            updateTiles(current, 'shape', 'deactive')
+            updateTiles(current, 'shape', 'deactive', currentTetrominoColor)
             addPoint()
             createNewTetronimo()
         }
