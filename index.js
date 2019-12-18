@@ -7,65 +7,81 @@ let currentTetromino
 let currentTetrominoColor
 let player
 let intervalSpeed = 500
-
-function generateRandom(){
-    return Math.floor((Math.random() * 7) + 1); 
-}
-
-const tetromino = {
-    1: (() => new TShape()),
-    2: (() => new IShape()),
-    3: (() => new LShape()),
-    4: (() => new OShape()),
-    5: (() => new SShape()),
-    6: (() => new JShape()),
-    7: (() => new ZShape())
-}
-
-
 let left = [{x: -1, y: 0}, {x: -1, y: 0}, {x: -1, y: 0}, {x: -1, y: 0}]
 let right = [{x: 1, y: 0}, {x: 1, y: 0}, {x: 1, y: 0}, {x: 1, y: 0}]
 let down = [{x: 0, y: 1}, {x: 0, y: 1}, {x: 0, y: 1}, {x: 0, y: 1}]
+
 NodeList.prototype.forEach = Array.prototype.forEach
 NodeList.prototype.map = Array.prototype.map
+NodeList.prototype.filter = Array.prototype.filter
 
-const user = document.querySelector('#user')
-user.insertAdjacentHTML('beforeend',`
-    <form id="login">
-        <label for="name">Username: </label>
-        <input type="text" name="name">
-        <input type="submit" value="login">
-    </form>
-`)
 
-const form = document.querySelector('#login')
-form.addEventListener('submit',function(event){
-    event.preventDefault()
-    if (event.type === 'submit') {
-        fetch(`http://localhost:3000/api/v1/users`)
-        .then(res => res.json())
-        .then(function(data){
-            
-            player = data.find(function(user){
-                return user.username === event.target.name.value
+/////// render user information 
+
+function renderLogin(){
+    const user = document.querySelector('#user')
+    user.insertAdjacentHTML('beforeend',`
+        <form id="login">
+            <label for="name">Username: </label>
+            <input id='username' type="text" name="name">
+            <input type="submit" value="login">
+        </form>
+        
+    `)
+}
+
+renderLogin()
+
+// const createAccount = document.querySelector('#create-account')
+// createAccount.addEventListener('click',function(event){
+//     const body = {
+//         first_name: usermame,
+//         last_name: usermame,
+//         username: usermame,
+//     }
+    
+//     fetch(`http://localhost:3000/api/v1/users`,{
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json",
+//             "Accepts": "application/json"
+//         },
+//         body: JSON.stringify(body)
+//     })    
+// })
+
+function loginButton(){
+    const form = document.querySelector('#login')
+    form.addEventListener('submit',function(event){
+        event.preventDefault()
+        if (event.type === 'submit') {
+            fetch(`http://localhost:3000/api/v1/users`)
+            .then(res => res.json())
+            .then(function(data){
+                
+                player = data.find(function(user){
+                    return user.username === event.target.name.value
+                })
+                
+                let previousGames
+                if (player.games.length >= 3){
+                    previousGames = player.games.slice(-3).reverse()
+                } else {
+                    previousGames = player.games.reverse()
+                }
+
+                const scores = player.games.map(function(game){
+                    return game.score
+                })
+                renderUsername(player.username)
+                renderHighScore(Math.max.apply(null, scores))
+                renderPreviousGames(previousGames)
             })
-            
-            let previousGames
-            if (player.games.length >= 3){
-                previousGames = player.games.slice(-3).reverse()
-            } else {
-                previousGames = player.games.reverse()
-            }
+        }
+    })
+}
 
-            const scores = player.games.map(function(game){
-                return game.score
-            })
-            renderUsername(player.username)
-            renderHighScore(Math.max.apply(null, scores))
-            renderPreviousGames(previousGames)
-        })
-    }
-})
+loginButton()
 
 function renderUsername(user){
     const userLogin = document.querySelector('#user')
@@ -99,7 +115,6 @@ function createNewScore(score){
         score: score,
         user_id: player.id
     }
-
     fetch('http://localhost:3000/api/v1/games',{
         method: "POST",
         headers: {
@@ -110,12 +125,10 @@ function createNewScore(score){
     })
     .then(res => res.json())
     .then(function(data){
-        console.log('hi')
         if (getCurrentHighScore() < data.score){
             renderHighScore(data.score)
         }
         updatePreviousGames(data.score, data.created_at.slice(0,10))
-        
     })
 }
 
@@ -130,6 +143,22 @@ function updatePreviousGames(score, played){
     gamesList.insertAdjacentHTML('afterbegin',`
         <li>${score} points on: ${played}</li>
     `)
+}
+
+//////////////////// game features
+
+function generateRandom(){
+    return Math.floor((Math.random() * 7) + 1); 
+}
+
+const tetromino = {
+    1: (() => new TShape()),
+    2: (() => new IShape()),
+    3: (() => new LShape()),
+    4: (() => new OShape()),
+    5: (() => new SShape()),
+    6: (() => new JShape()),
+    7: (() => new ZShape())
 }
 
 function createGrid(){
@@ -160,6 +189,7 @@ function createNewTetronimo(){
         clearInterval(shapeDescend)
         const score = document.querySelector('#score').querySelector('span')
         createNewScore(parseInt(score.innerText))
+        
     }
 }
 
@@ -264,11 +294,15 @@ function run(){
     shapeDescend = setInterval(function(){
         if (checkTetrominoMovePosition(down)) {  
             move(down)
+
         } else {
-            let current = getActiveTetrominoCoordinates()
+            let current = getActiveTetrominoCoordinates()            
             updateTiles(current, 'shape', 'deactive', currentTetrominoColor)
+            //////////////
+            // clearRow(current)
             addPoint()
             createNewTetronimo()
+
         }
       }, intervalSpeed)
 }
@@ -303,3 +337,26 @@ document.addEventListener('click', function(event){
 })
 
 createGrid()
+
+
+///////////////////////
+
+// function getUniqueYCords(tetromino){
+//     let yCords = tetromino.map((tile) => parseInt(tile.y))
+//     let arr = [];
+//     for (let i = 0; i < yCords.length; i++) {
+//         if (!arr.contains(yCords[i])) {
+//         arr.push(yCords[i]);
+//         }
+//     }
+//     return arr;
+// }
+
+// function clearRow(tetromino){
+    
+//     array = getUniqueYCords(tetromino)
+//     debugger
+//     // tetromino.forEach(function(tile){
+//     //     if ()
+//     // })
+// }
