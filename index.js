@@ -32,23 +32,6 @@ function renderLogin(){
 
 renderLogin()
 
-// const createAccount = document.querySelector('#create-account')
-// createAccount.addEventListener('click',function(event){
-//     const body = {
-//         first_name: usermame,
-//         last_name: usermame,
-//         username: usermame,
-//     }
-    
-//     fetch(`http://localhost:3000/api/v1/users`,{
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json",
-//             "Accepts": "application/json"
-//         },
-//         body: JSON.stringify(body)
-//     })    
-// })
 
 function loginButton(){
     const form = document.querySelector('#login')
@@ -337,26 +320,3 @@ document.addEventListener('click', function(event){
 })
 
 createGrid()
-
-
-///////////////////////
-
-// function getUniqueYCords(tetromino){
-//     let yCords = tetromino.map((tile) => parseInt(tile.y))
-//     let arr = [];
-//     for (let i = 0; i < yCords.length; i++) {
-//         if (!arr.contains(yCords[i])) {
-//         arr.push(yCords[i]);
-//         }
-//     }
-//     return arr;
-// }
-
-// function clearRow(tetromino){
-    
-//     array = getUniqueYCords(tetromino)
-//     debugger
-//     // tetromino.forEach(function(tile){
-//     //     if ()
-//     // })
-// }
