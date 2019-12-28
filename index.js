@@ -1,4 +1,4 @@
-let gridRows = 15;
+let gridRows = 20;
 let gridColumns = 10;
 let currentPosition
 let currentTetrominoDirection
@@ -26,7 +26,6 @@ function renderLogin(){
             <input id='username' type="text" name="name">
             <input type="submit" value="login">
         </form>
-        
     `)
 }
 
@@ -145,7 +144,7 @@ const tetromino = {
 }
 
 function createGrid(){
-    const board = document.querySelector("#board")  
+    const board = document.querySelector(".item2")  
     for (let i=0; i < gridRows; i++){
       for (let j=0; j < gridColumns; j++){
         board.insertAdjacentHTML("beforeend", `
