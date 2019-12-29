@@ -15,7 +15,6 @@ NodeList.prototype.forEach = Array.prototype.forEach
 NodeList.prototype.map = Array.prototype.map
 NodeList.prototype.filter = Array.prototype.filter
 
-
 /////// render user information 
 
 function renderLogin(){
